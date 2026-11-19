@@ -661,8 +661,8 @@ func _clear_round_actors() -> void:
 		monster_node.queue_free()
 	monster_node = null
 	if beacon.has("node") and is_instance_valid(beacon["node"]):
-		turret["node"].queue_free()
-	turret.clear()
+		beacon["node"].queue_free()
+	beacon.clear()
 	for trap in trap_nodes:
 		if is_instance_valid(trap):
 			trap.queue_free()
@@ -909,7 +909,7 @@ func _lowest_health_survivor() -> Dictionary:
 	return best
 
 func _place_stasis_beacon() -> void:
-	if turret.has("node") and is_instance_valid(turret["node"]):
+	if beacon.has("node") and is_instance_valid(beacon["node"]):
 		return
 	var player_node: CharacterBody3D = survivors[0]["node"]
 	var t := Node3D.new()
@@ -944,17 +944,17 @@ func _place_stasis_beacon() -> void:
 	_show_toast("Маяк стазиса активирован! Он выдержит 3 удара")
 
 func _update_stasis_beacon(delta: float) -> void:
-	if not turret.has("node") or not is_instance_valid(turret["node"]):
+	if not beacon.has("node") or not is_instance_valid(beacon["node"]):
 		return
 	beacon_tick -= delta
-	if turret_tick <= 0.0 and is_instance_valid(monster_node) and turret["node"].global_position.distance_to(monster_node.global_position) < 13.0:
+	if beacon_tick <= 0.0 and is_instance_valid(monster_node) and beacon["node"].global_position.distance_to(monster_node.global_position) < 13.0:
 		monster_slow = maxf(monster_slow, 1.7)
-		turret_tick = 0.9
-		if turret["node"].global_position.distance_to(monster_node.global_position) < 2.0:
-			beacon["hp"] = int(turret["hp"]) - 1
-			if int(turret["hp"]) <= 0:
-				turret["node"].queue_free()
-				turret.clear()
+		beacon_tick = 0.9
+		if beacon["node"].global_position.distance_to(monster_node.global_position) < 2.0:
+			beacon["hp"] = int(beacon["hp"]) - 1
+			if int(beacon["hp"]) <= 0:
+				beacon["node"].queue_free()
+				beacon.clear()
 				_show_toast("Монстр разрушил маяк стазиса!")
 
 func _stun_monster(seconds: float) -> void:

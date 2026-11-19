@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-android:
@@ -69,10 +69,12 @@ jobs:
           mkdir -p build
           "$HOME/godot/Godot_v4.4.1-stable_linux.x86_64" --headless --verbose --path . --export-debug "Android" build/HideAndSurvive-Android.apk
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+      - name: Publish APK as GitHub Release asset
+        uses: softprops/action-gh-release@v2
         with:
-          name: HideAndSurvive-Android-APK
-          path: build/HideAndSurvive-Android.apk
-          if-no-files-found: error
-          retention-days: 14
+          tag_name: android-build-${{ github.run_number }}
+          name: Hide and Survive Android build ${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          files: build/HideAndSurvive-Android.apk
+          fail_on_unmatched_files: true
+          make_latest: false

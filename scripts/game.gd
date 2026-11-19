@@ -870,7 +870,8 @@ func _use_class_ability() -> void:
 			_show_toast("Медик восстановил здоровье союзнику")
 		"military":
 			if is_instance_valid(monster_node):
-				var away := (monster_node.global_position - player_data["node"].global_position).normalized()
+				var player_node: CharacterBody3D = player_data["node"]
+				var away: Vector3 = (monster_node.global_position - player_node.global_position).normalized()
 				monster_node.global_position += away * 5.0
 				_stun_monster(1.1)
 		"hacker":
@@ -977,7 +978,8 @@ func _use_item(id: String) -> void:
 			_stun_monster(5.0)
 		"bomb":
 			if is_instance_valid(monster_node):
-				var away := (monster_node.global_position - player_data["node"].global_position).normalized()
+				var player_node: CharacterBody3D = player_data["node"]
+				var away: Vector3 = (monster_node.global_position - player_node.global_position).normalized()
 				monster_node.global_position += away * 10.0
 				_stun_monster(1.5)
 		"cloak":

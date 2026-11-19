@@ -6,7 +6,7 @@ const CLASS_DATA := {
 	"medic": {"title": "Медик", "hp": 90, "price": 500, "description": "Лечит союзника на 25 HP"},
 	"military": {"title": "Военный", "hp": 120, "price": 1250, "description": "Таран отталкивает монстра"},
 	"hacker": {"title": "Взломщик", "hp": 100, "price": 4000, "description": "Останавливает монстра на 5 секунд"},
-	"builder": {"title": "Строитель", "hp": 120, "price": 7500, "description": "Турель замедляет монстра"},
+	"builder": {"title": "Строитель", "hp": 120, "price": 7500, "description": "Маяк стазиса создаёт поле замедления"},
 	"mage": {"title": "Маг", "hp": 80, "price": 20000, "description": "Проклятие и полное лечение"}
 }
 const ITEM_DATA := {
@@ -64,8 +64,8 @@ var twixxel_stalk_cd := 38.0
 var stalk_time := 0.0
 var hunt_time := 0.0
 var hunt_target: Dictionary = {}
-var turret: Dictionary = {}
-var turret_tick := 0.0
+var beacon: Dictionary = {}
+var beacon_tick := 0.0
 var trap_nodes: Array[Node3D] = []
 var touch_index := -1
 var joystick_value := Vector2.ZERO
@@ -99,7 +99,7 @@ func _physics_process(delta: float) -> void:
 	if round_state != "playing":
 		return
 	_update_survivors(delta)
-	_update_turret(delta)
+	_update_stasis_beacon(delta)
 	_update_traps()
 	_update_monster(delta)
 	var alive_count := _alive_count()
@@ -627,7 +627,7 @@ func _start_round() -> void:
 	twixxel_stalk_cd = 38.0
 	stalk_time = 0.0
 	hunt_time = 0.0
-	turret.clear()
+	beacon.clear()
 	trap_nodes.clear()
 	var class_stats: Dictionary = CLASS_DATA[current_class]
 	var player_color := Color(0.18, 0.64, 0.92)
@@ -660,7 +660,7 @@ func _clear_round_actors() -> void:
 	if is_instance_valid(monster_node):
 		monster_node.queue_free()
 	monster_node = null
-	if turret.has("node") and is_instance_valid(turret["node"]):
+	if beacon.has("node") and is_instance_valid(beacon["node"]):
 		turret["node"].queue_free()
 	turret.clear()
 	for trap in trap_nodes:
@@ -878,7 +878,7 @@ func _use_class_ability() -> void:
 			_stun_monster(5.0)
 			_show_toast("Разум монстра взломан на 5 секунд")
 		"builder":
-			_place_turret()
+			_place_stasis_beacon()
 		"mage":
 			monster_slow = 10.0
 			_show_toast("Проклятие замедлило монстра на 10 секунд")
@@ -908,7 +908,7 @@ func _lowest_health_survivor() -> Dictionary:
 			best = d
 	return best
 
-func _place_turret() -> void:
+func _place_stasis_beacon() -> void:
 	if turret.has("node") and is_instance_valid(turret["node"]):
 		return
 	var player_node: CharacterBody3D = survivors[0]["node"]
@@ -923,30 +923,39 @@ func _place_turret() -> void:
 	base.position.y = 0.25
 	base.material_override = _material(Color(0.18, 0.52, 0.72), 0.35)
 	t.add_child(base)
-	var barrel := MeshInstance3D.new()
-	var box := BoxMesh.new()
-	box.size = Vector3(0.3, 0.35, 1.6)
-	barrel.mesh = box
-	barrel.position.y = 0.8
-	barrel.material_override = _material(Color(0.50, 0.75, 0.88), 0.3)
-	t.add_child(barrel)
+	var beacon_core := MeshInstance3D.new()
+	var core_mesh := SphereMesh.new()
+	core_mesh.radius = 0.42
+	core_mesh.height = 0.84
+	beacon_core.mesh = core_mesh
+	beacon_core.position.y = 1.05
+	beacon_core.material_override = _material(Color(0.35, 0.9, 1.0), 0.2)
+	t.add_child(beacon_core)
+	var aura := MeshInstance3D.new()
+	var aura_mesh := TorusMesh.new()
+	aura_mesh.inner_radius = 0.78
+	aura_mesh.outer_radius = 0.90
+	aura.mesh = aura_mesh
+	aura.position.y = 0.20
+	aura.material_override = _material(Color(0.2, 0.75, 1.0), 0.2)
+	t.add_child(aura)
 	world_root.add_child(t)
-	turret = {"node": t, "hp": 3}
-	_show_toast("Турель построена! Её можно разрушить за 3 удара")
+	beacon = {"node": t, "hp": 3}
+	_show_toast("Маяк стазиса активирован! Он выдержит 3 удара")
 
-func _update_turret(delta: float) -> void:
+func _update_stasis_beacon(delta: float) -> void:
 	if not turret.has("node") or not is_instance_valid(turret["node"]):
 		return
-	turret_tick -= delta
+	beacon_tick -= delta
 	if turret_tick <= 0.0 and is_instance_valid(monster_node) and turret["node"].global_position.distance_to(monster_node.global_position) < 13.0:
 		monster_slow = maxf(monster_slow, 1.7)
 		turret_tick = 0.9
 		if turret["node"].global_position.distance_to(monster_node.global_position) < 2.0:
-			turret["hp"] = int(turret["hp"]) - 1
+			beacon["hp"] = int(turret["hp"]) - 1
 			if int(turret["hp"]) <= 0:
 				turret["node"].queue_free()
 				turret.clear()
-				_show_toast("Монстр сломал турель!")
+				_show_toast("Монстр разрушил маяк стазиса!")
 
 func _stun_monster(seconds: float) -> void:
 	monster_stun = maxf(monster_stun, seconds)

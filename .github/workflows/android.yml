@@ -1,0 +1,57 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-android:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android packages
+        run: |
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Install Godot 4.4.1
+        run: |
+          mkdir -p "$HOME/godot" "$HOME/.local/share/godot/export_templates/4.4.1.stable"
+          curl -L "https://github.com/godotengine/godot/releases/download/4.4.1-stable/Godot_v4.4.1-stable_linux.x86_64.zip" -o "$HOME/godot/godot.zip"
+          unzip -q "$HOME/godot/godot.zip" -d "$HOME/godot"
+          chmod +x "$HOME/godot/Godot_v4.4.1-stable_linux.x86_64"
+          curl -L "https://github.com/godotengine/godot/releases/download/4.4.1-stable/Godot_v4.4.1-stable_export_templates.tpz" -o "$HOME/godot/templates.tpz"
+          mkdir -p "$HOME/godot/template_unpack"
+          unzip -q "$HOME/godot/templates.tpz" -d "$HOME/godot/template_unpack"
+          cp -a "$HOME/godot/template_unpack/templates/." "$HOME/.local/share/godot/export_templates/4.4.1.stable/"
+
+      - name: Import project
+        run: |
+          "$HOME/godot/Godot_v4.4.1-stable_linux.x86_64" --headless --editor --path . --quit
+
+      - name: Export Android APK (ARMv7 + ARM64)
+        run: |
+          mkdir -p build
+          "$HOME/godot/Godot_v4.4.1-stable_linux.x86_64" --headless --path . --export-debug "Android" build/HideAndSurvive-Android.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: HideAndSurvive-Android-APK
+          path: build/HideAndSurvive-Android.apk
+          if-no-files-found: error
+          retention-days: 14

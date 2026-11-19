@@ -60,6 +60,7 @@ var monster_slow := 0.0
 var monster_attack_cd := 0.0
 var monster_special_cd := 8.0
 var monster_dash_time := 0.0
+var twixxel_stalk_cd := 38.0
 var stalk_time := 0.0
 var hunt_time := 0.0
 var hunt_target: Dictionary = {}
@@ -623,6 +624,7 @@ func _start_round() -> void:
 	monster_attack_cd = 1.0
 	monster_special_cd = 7.0
 	monster_dash_time = 0.0
+	twixxel_stalk_cd = 38.0
 	stalk_time = 0.0
 	hunt_time = 0.0
 	turret.clear()
@@ -683,7 +685,11 @@ func _update_survivors(delta: float) -> void:
 		d["cloak"] = maxf(0.0, float(d["cloak"]) - delta)
 		d["invuln"] = maxf(0.0, float(d["invuln"]) - delta)
 		var direction := Vector3.ZERO
-		if float(d["stun"]) <= 0.0 and stalk_time <= 0.0:
+		if stalk_time > 0.0:
+			if d["is_player"] and move_input.length() > 0.12:
+				_damage_survivor(d, 999, true)
+			direction = Vector3.ZERO
+		elif float(d["stun"]) <= 0.0:
 			if d["is_player"]:
 				direction = Vector3(move_input.x, 0, move_input.y)
 			else:
@@ -733,6 +739,10 @@ func _update_monster(delta: float) -> void:
 	monster_attack_cd = maxf(0.0, monster_attack_cd - delta)
 	monster_special_cd = maxf(0.0, monster_special_cd - delta)
 	monster_dash_time = maxf(0.0, monster_dash_time - delta)
+	twixxel_stalk_cd = maxf(0.0, twixxel_stalk_cd - delta)
+	if hunt_time > 0.0 and (hunt_target.is_empty() or not hunt_target.get("alive", false)):
+		hunt_time = 0.0
+		hunt_target = {}
 	if monster_stun > 0.0:
 		monster_node.velocity = Vector3.ZERO
 		monster_node.move_and_slide()
@@ -765,16 +775,16 @@ func _update_monster(delta: float) -> void:
 	var offset := target_body.global_position - monster_node.global_position
 	var distance := offset.length()
 	var dir := offset.normalized()
-	if str(monster["id"]) == "twixxel" and stalk_time <= 0.0 and monster_special_cd < 18.0 and monster_special_cd > 0.0 and distance > 4.0 and hunt_time <= 0.0:
-		if monster_special_cd < 17.6:
-			pass
 	if str(monster["id"]) == "twixxel" and monster_attack_cd <= 0.0 and distance < 2.2:
 		_damage_survivor(target, 30)
 		monster_attack_cd = 2.0
-	if str(monster["id"]) == "twixxel" and monster_special_cd <= 0.0 and stalk_time <= 0.0 and hunt_time <= 0.0:
+	if str(monster["id"]) == "twixxel" and twixxel_stalk_cd <= 0.0 and hunt_time <= 0.0 and stalk_time <= 0.0:
 		stalk_time = 20.0
-		monster_special_cd = 25.0
+		twixxel_stalk_cd = 58.0
+		monster_node.velocity = Vector3.ZERO
+		monster_node.move_and_slide()
 		_show_toast("СТАЛКЕРСТВО! НЕ ДВИГАЙСЯ!")
+		return
 	if str(monster["id"]) != "twixxel":
 		var speed: float = monster["speed"]
 		if monster_slow > 0.0:
@@ -1021,7 +1031,7 @@ func _on_trap_body_entered(body: Node3D, area: Area3D) -> void:
 			area.queue_free()
 
 func _update_traps() -> void:
-	for trap in trap_nodes:
+	for trap in trap_nodes.duplicate():
 		if is_instance_valid(trap) and is_instance_valid(monster_node):
 			if trap.global_position.distance_to(monster_node.global_position) < 1.5:
 				_stun_monster(10.0)

@@ -11,7 +11,7 @@
 - 3D-графика создаётся процедурно, чтобы не требовать тяжёлых внешних моделей.
 
 ## Сборка APK
-GitHub Actions собирает debug APK после каждого push в `main`.
+GitHub Actions собирает debug APK после каждого push в `main` (обе ARM-архитектуры).
 Открой вкладку **Actions**, выбери успешный запуск **Build Android APK** и скачай artifact **HideAndSurvive-Android-APK**.
 
 ## Важно

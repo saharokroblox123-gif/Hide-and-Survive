@@ -28,7 +28,7 @@ jobs:
 
       - name: Install Android packages
         run: |
-          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0" "cmdline-tools;latest" "cmake;3.10.2.4988404" "ndk;23.2.8568313"
 
       - name: Configure Godot Android SDK paths
         run: |
@@ -51,6 +51,14 @@ jobs:
           mkdir -p "$HOME/godot/template_unpack"
           unzip -q "$HOME/godot/templates.tpz" -d "$HOME/godot/template_unpack"
           cp -a "$HOME/godot/template_unpack/templates/." "$HOME/.local/share/godot/export_templates/4.4.1.stable/"
+
+      - name: Create temporary Android debug keystore
+        run: |
+          mkdir -p "$HOME/.android"
+          keytool -genkeypair -v -keystore "$HOME/.android/debug.keystore" -storepass android -keypass android -alias androiddebugkey -dname "CN=Android Debug,O=Android,C=US" -keyalg RSA -keysize 2048 -validity 10000
+          echo "GODOT_ANDROID_KEYSTORE_DEBUG_PATH=$HOME/.android/debug.keystore" >> "$GITHUB_ENV"
+          echo "GODOT_ANDROID_KEYSTORE_DEBUG_USER=androiddebugkey" >> "$GITHUB_ENV"
+          echo "GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android" >> "$GITHUB_ENV"
 
       - name: Import project
         run: |

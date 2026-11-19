@@ -14,7 +14,7 @@ const ITEM_DATA := {
 	"block": {"title": "Блок", "price": 750, "description": "Защита от удара"},
 	"trap": {"title": "Капкан", "price": 1750, "description": "Стан на 10 секунд"},
 	"pulse": {"title": "Импульсный разряд", "price": 4000, "description": "Останавливает монстра на 5 секунд"},
-	"bomb": {"title": "Бомба", "price": 8500, "description": "Отбрасывает монстра"},
+	"gravity_orb": {"title": "Гравитационная сфера", "price": 8500, "description": "Отталкивает монстра на большое расстояние"},
 	"cloak": {"title": "Плащ-невидимка", "price": 14750, "description": "Невидимость на 10 секунд"},
 	"elixir": {"title": "Эликсир бессмертия", "price": 20000, "description": "Защита на 10 секунд"},
 	"revive": {"title": "Возрождение", "price": 30000, "description": "Возвращает союзника в раунд"}
@@ -976,7 +976,7 @@ func _use_item(id: String) -> void:
 			_place_trap()
 		"pulse":
 			_stun_monster(5.0)
-		"bomb":
+		"gravity_orb":
 			if is_instance_valid(monster_node):
 				var player_node: CharacterBody3D = player_data["node"]
 				var away: Vector3 = (monster_node.global_position - player_node.global_position).normalized()

@@ -10,9 +10,9 @@ const CLASS_DATA := {
 	"mage": {"title": "Маг", "hp": 80, "price": 20000, "description": "Проклятие и полное лечение"}
 }
 const ITEM_DATA := {
-	"glove": {"title": "Перчатка", "price": 250, "description": "Опрокидывает монстра"},
+	"glove": {"title": "Импульсная перчатка", "price": 250, "description": "Вызывает энергетическую волну, опрокидывающую монстра"},
 	"block": {"title": "Блок", "price": 750, "description": "Защита от удара"},
-	"trap": {"title": "Капкан", "price": 1750, "description": "Стан на 10 секунд"},
+	"trap": {"title": "Руна стазиса", "price": 1750, "description": "Магическое поле останавливает монстра на 10 секунд"},
 	"pulse": {"title": "Импульсный разряд", "price": 4000, "description": "Останавливает монстра на 5 секунд"},
 	"gravity_orb": {"title": "Гравитационная сфера", "price": 8500, "description": "Отталкивает монстра на большое расстояние"},
 	"cloak": {"title": "Плащ-невидимка", "price": 14750, "description": "Невидимость на 10 секунд"},

@@ -645,7 +645,7 @@ func _start_round() -> void:
 		survivors.append({"node": bot, "name": bot_names[i], "hp": 100, "max_hp": 100, "alive": true, "is_player": false, "stun": 0.0, "cloak": 0.0, "invuln": 0.0, "moving": false, "ai_time": rng.randf_range(0.0, 2.0), "ai_dir": Vector3.ZERO})
 	selected_monster = MONSTER_DATA[rng.randi_range(0, MONSTER_DATA.size() - 1)]
 	monster_node = _create_actor(str(selected_monster["title"]), selected_monster["color"], true, str(selected_monster["id"]))
-	monster_node.position = Vector3(0, 0, 31)
+	monster_node.position = Vector3(0, 0, -31)
 	world_root.add_child(monster_node)
 	monster = {"id": selected_monster["id"], "title": selected_monster["title"], "speed": selected_monster["speed"]}
 	_build_ability_buttons()
@@ -974,7 +974,7 @@ func _use_item(id: String) -> void:
 			player_data["invuln"] = 3.0
 		"trap":
 			_place_trap()
-		"pistol":
+		"pulse":
 			_stun_monster(5.0)
 		"bomb":
 			if is_instance_valid(monster_node):
@@ -1081,8 +1081,7 @@ func _end_round(success: bool) -> void:
 	var note := box.get_child(box.get_child_count() - 1) as Label
 	note.text = "Новый монстр будет выбран случайно"
 	_clear_round_actors()
-	camera.global_position = Vector3(0, 9, 16)
-	camera.look_at(Vector3.ZERO, Vector3.UP)
+	_show_lobby()
 
 func _show_toast(message: String) -> void:
 	if not is_instance_valid(ui_root):

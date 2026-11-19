@@ -13,7 +13,7 @@ const ITEM_DATA := {
 	"glove": {"title": "Перчатка", "price": 250, "description": "Опрокидывает монстра"},
 	"block": {"title": "Блок", "price": 750, "description": "Защита от удара"},
 	"trap": {"title": "Капкан", "price": 1750, "description": "Стан на 10 секунд"},
-	"pistol": {"title": "Пистолет", "price": 4000, "description": "Стан на 5 секунд"},
+	"pulse": {"title": "Импульсный разряд", "price": 4000, "description": "Останавливает монстра на 5 секунд"},
 	"bomb": {"title": "Бомба", "price": 8500, "description": "Отбрасывает монстра"},
 	"cloak": {"title": "Плащ-невидимка", "price": 14750, "description": "Невидимость на 10 секунд"},
 	"elixir": {"title": "Эликсир бессмертия", "price": 20000, "description": "Защита на 10 секунд"},
